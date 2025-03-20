@@ -1,4 +1,3 @@
-import { Client } from 'exaroton';
 import 'dotenv/config';
 
 class ServerStatus {
@@ -15,18 +14,7 @@ class ServerStatus {
   static PREPARING = 10;
 }
 
-const token = process.env.EXAROTON_TOKEN;
-const client = new Client(token);
-
-const serverId = process.env.EXAROTON_SERVER_ID;
-const server = client.server(serverId);
-
-// server.subscribe();
-// server.on("status", function(server) {
-//     console.log(server.status);
-// });
-
-export const mineStatus = async () => {
+export const mineStatus = async (server) => {
   await server.get();
 
   switch (server.status) {

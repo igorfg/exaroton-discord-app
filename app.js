@@ -7,9 +7,24 @@ import {
 } from 'discord-interactions';
 import { getRandomEmoji } from './utils.js';
 import { mineStatus, mineStart, mineStop } from './exaroton/server.js';
+import { connectToExaroton } from './exaroton/exarotonService.js';
+import { subscribeToServerWebsocket } from './exaroton/serverWebsocket.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const exarotonServer = await connectToExaroton();
+subscribeToServerWebsocket(exarotonServer);
+
+app.post('/server_websocket', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function(req, res) {
+  const { type, data } = req.body;
+
+  if (type === 0) {
+    return res.status(204).send();
+  }
+
+  console.log('Chamou server_websocket')
+})
 
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
   const { type, data } = req.body;
@@ -34,7 +49,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: await mineStatus(),
+          content: await mineStatus(exarotonServer),
         },
       });
     }
